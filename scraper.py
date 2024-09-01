@@ -67,7 +67,7 @@ def extract_scrape_settings():
 
 def create_driver():
     """
-    Creates Selenium driver
+    Creates a Selenium driver
     """
     ua = UserAgent()
     user_agent = ua.random
@@ -122,7 +122,7 @@ def get_conference_links(scrape_data, root_url):
 
 def manage_conference_info(conference_data, scrape_data, driver, recognizer):
     """
-    Iterates through all conferences and papers
+    Iterates through all conferences and papers and saves their information
     """
 
     raw_data = {"DOI": [], "conference_title": [], "scholar_title": [], "conference": [], "volume": [], "citations": [],
@@ -206,6 +206,9 @@ def get_citations(dois, driver, recognizer):
 
 
 def get_result_information(titles, citation_counts, retrieved_at, driver):
+    """
+    Returns the citation count for the current google scholar article
+    """
     try:
         title = driver.find_element(By.XPATH, "//div[@data-rp='0']//h3/a").text
         titles.append(title)
@@ -231,6 +234,12 @@ def save_results(data):
 
 
 def solve_captcha(driver, recognizer):
+    """
+    Attempts to solve a detected captcha by clicking captcha checkbox
+    or by solving the captcha audio. Will fail if the audio solve is no longer available
+    and will require a cooldown period until captcha is solvable again.
+    """
+    
     print("Solving captcha..")
     frame = WebDriverWait(driver, 20).until(ec.presence_of_element_located(
         (By.CSS_SELECTOR, "iframe")))
