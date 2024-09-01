@@ -19,6 +19,9 @@ import requests
 import pandas as pd
 
 
+OUTPUT_FILE_PATH = "raw_data.csv"
+
+
 def initiate_scraper():
     """
     Initiates the scraper
@@ -230,7 +233,7 @@ def get_result_information(titles, citation_counts, retrieved_at, driver):
 
 def save_results(data):
     print("Saving results")
-    pd.DataFrame(data).to_csv("raw_data.csv", index=False)
+    pd.DataFrame(data).to_csv(OUTPUT_FILE_PATH, index=False)
 
 
 def solve_captcha(driver, recognizer):
