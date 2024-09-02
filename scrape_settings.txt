@@ -1,0 +1,68 @@
+acl (doi)
+Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)
+Findings of the Association for Computational Linguistics: ACL 2023
+Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)
+Findings of the Association for Computational Linguistics: ACL 2022
+Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing, ACL/IJCNLP 2021, (Volume 1: Long Papers)
+Findings of the Association for Computational Linguistics: ACL/IJCNLP 2021
+Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics
+
+emnlp (doi)
+Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing
+Findings of the Association for Computational Linguistics: EMNLP 2023
+Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing
+Findings of the Association for Computational Linguistics: EMNLP 2022
+Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing
+Findings of the Association for Computational Linguistics: EMNLP 2021
+Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing
+Findings of the Association for Computational Linguistics: EMNLP 2020
+
+naacl (doi)
+Proceedings of the 2022 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies
+Findings of the Association for Computational Linguistics: NAACL 2022
+Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies
+
+eacl (doi)
+Proceedings of the 17th Conference of the European Chapter of the Association for Computational Linguistics
+Findings of the Association for Computational Linguistics: EACL 2023
+Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume
+
+um (title)
+Proceedings of the 31st ACM Conference on User Modeling, Adaptation and Personalization, UMAP 2023
+UMAP '22: 30th ACM Conference on User Modeling, Adaptation and Personalization
+Proceedings of the 29th ACM Conference on User Modeling, Adaptation and Personalization
+Proceedings of the 28th ACM Conference on User Modeling, Adaptation and Personalization
+
+recsys (title)
+Proceedings of the 17th ACM Conference on Recommender Systems
+RecSys '22: Sixteenth ACM Conference on Recommender Systems
+RecSys '21: Fifteenth ACM Conference on Recommender Systems
+RecSys 2020: Fourteenth ACM Conference on Recommender Systems
+
+ht (title)
+Proceedings of the 34th ACM Conference on Hypertext and Social Media
+HT '22: 33rd ACM Conference on Hypertext and Social Media
+HT '21: 32nd ACM Conference on Hypertext and Social Media
+HT '20: 31st ACM Conference on Hypertext and Social Media
+
+ecai (title)
+ECAI 2023 - 26th European Conference on Artificial Intelligence
+ECAI 2020 - 24th European Conference on Artificial Intelligence
+
+ijcai (title)
+Proceedings of the Thirty-Second International Joint Conference on Artificial Intelligence
+Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence
+Proceedings of the Thirtieth International Joint Conference on Artificial Intelligence
+Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence
+
+icml (title)
+International Conference on Machine Learning, ICML 2023
+International Conference on Machine Learning, ICML 2022
+Proceedings of the 38th International Conference on Machine Learning, ICML 2021
+Proceedings of the 37th International Conference on Machine Learning, ICML 2020
+
+nips (title)
+Advances in Neural Information Processing Systems 36: Annual Conference on Neural Information Processing Systems 2023
+Advances in Neural Information Processing Systems 35: Annual Conference on Neural Information Processing Systems 2022
+Advances in Neural Information Processing Systems 34: Annual Conference on Neural Information Processing Systems 2021
+#Advances in Neural Information Processing Systems 33: Annual Conference on Neural Information Processing Systems 2020

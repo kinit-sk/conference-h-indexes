@@ -1,0 +1,8 @@
+selenium
+undetected-chromedriver
+fake-useragent
+SpeechRecognition
+lxml
+pydub
+requests
+pandas
