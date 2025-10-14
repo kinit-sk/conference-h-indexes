@@ -99,11 +99,10 @@ class Volume:
             scholar_title, citation_count = self._parse_scholar_entry()
             scraped.append({**paper, "scholar_title": scholar_title, "citations": citation_count,
                             "retrieved_at": datetime.now()})
-            print(f" | {doi}")
 
             # Save if checkpoint or end
             if index % self.checkpoint_interval == 0 or index == len(self.unscraped):
-                print(f"{index} papers scraped")
+                print(f"Checkpoint: {index} scrapings saved")
                 pd.DataFrame(scraped).to_csv(self.output_file_name, mode='a', header=not self.output_file_exists, index=False)
                 scraped = []
 
@@ -165,14 +164,11 @@ class Volume:
                     ec.presence_of_element_located((By.XPATH, "//a[contains(text(), 'Cited by')]"))
                 )
                 citation_count = int(citation_element.text.split()[-1])
-                print(f"Citations: {citation_count}", end="")
             except TimeoutException:
                 citation_count = 0
-                print(f"No citations", end="")
         except NoSuchElementException:
             title = -1
             citation_count = -1
-            print(f"Paper is not on google scholar", end="")
 
         return title, citation_count
 
