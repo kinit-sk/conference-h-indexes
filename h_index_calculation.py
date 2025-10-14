@@ -1,7 +1,8 @@
+import glob
 import pandas as pd
 
 
-INPUT_FILE_PATH = "raw_data.csv"
+SCRAPING_FOLDER = "out/"
 OUTPUT_FILE_PATH = "conferences_h_indices.csv"
 
 
@@ -24,7 +25,14 @@ def calculate_h_index(citations):
     return h_index
 
 
-df = pd.read_csv(INPUT_FILE_PATH)[["DOI", "conference", "volume", "citations", "year"]]
+def open_all(folder, columns):
+    csv_files = glob.glob(f"{folder}/*.csv")
+    df_list = [pd.read_csv(file, usecols=columns) for file in csv_files ]
+    agg_df = pd.concat(df_list, ignore_index=True)
+    return agg_df
+
+
+df = open_all(SCRAPING_FOLDER, ["DOI", "conference", "volume", "citations", "year"])
 filtered_df = df[df["DOI"] != -1][["conference", "volume", "citations", "year"]]
 grouping = filtered_df.groupby(["conference", "volume", "year"], as_index=False )
 
