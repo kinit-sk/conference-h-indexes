@@ -3,7 +3,14 @@ A set of scripts for scraping citation data to enable h-index comparisons among 
 # Scraper
 The scraper is saved in the scraper.py file. It works by finding all articles in requested volumes on dblp and then finds their respective citation counts on google scholar either through the article's DOI or title. By default, the raw scraped data get saved into raw_data.csv, which is used for h-index calculation.
 
+
+
 ## Scraper settings
+
+### Python version: 3.10
+The latest version of the scraper was run on python __3.10__, so this is the recommended version to use.
+
+### Settings file
 In order to scrape a conference volume, the scraper needs at least 2 pieces of information:
 1. The conference name abbreviation, such that the following URL is valid: https://dblp.org/db/conf/CONFERENCE_NAME
 2. The volume title you want to scrape articles from. The title needs to be copy pasted from https://dblp.org/db/conf/CONFERENCE_NAME, however, you do not need to copy paste the entire title, as they tend to be quite verbose. Instead, you only need to copy enough of the title so that it is unique.
