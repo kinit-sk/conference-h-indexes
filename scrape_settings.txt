@@ -1,4 +1,6 @@
 acl (doi)
+Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)
+Findings of the Association for Computational Linguistics, ACL 2024
 Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)
 Findings of the Association for Computational Linguistics: ACL 2023
 Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)
@@ -8,6 +10,8 @@ Findings of the Association for Computational Linguistics: ACL/IJCNLP 2021
 Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics
 
 emnlp (doi)
+Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing
+Findings of the Association for Computational Linguistics: EMNLP 2024
 Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing
 Findings of the Association for Computational Linguistics: EMNLP 2023
 Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing
@@ -18,51 +22,76 @@ Proceedings of the 2020 Conference on Empirical Methods in Natural Language Proc
 Findings of the Association for Computational Linguistics: EMNLP 2020
 
 naacl (doi)
+Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers)
+Findings of the Association for Computational Linguistics: NAACL 2024
 Proceedings of the 2022 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies
 Findings of the Association for Computational Linguistics: NAACL 2022
 Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies
 
 eacl (doi)
+Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics, EACL 2024 - Volume 1: Long Papers
+Findings of the Association for Computational Linguistics: EACL 2024
 Proceedings of the 17th Conference of the European Chapter of the Association for Computational Linguistics
 Findings of the Association for Computational Linguistics: EACL 2023
 Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume
 
 um (title)
+Proceedings of the 32nd ACM Conference on User Modeling, Adaptation and Personalization, UMAP 2024
 Proceedings of the 31st ACM Conference on User Modeling, Adaptation and Personalization, UMAP 2023
 UMAP '22: 30th ACM Conference on User Modeling, Adaptation and Personalization
 Proceedings of the 29th ACM Conference on User Modeling, Adaptation and Personalization
 Proceedings of the 28th ACM Conference on User Modeling, Adaptation and Personalization
 
 recsys (title)
+Proceedings of the 18th ACM Conference on Recommender Systems
 Proceedings of the 17th ACM Conference on Recommender Systems
 RecSys '22: Sixteenth ACM Conference on Recommender Systems
 RecSys '21: Fifteenth ACM Conference on Recommender Systems
 RecSys 2020: Fourteenth ACM Conference on Recommender Systems
 
 ht (title)
+Proceedings of the 35th ACM Conference on Hypertext and Social Media
 Proceedings of the 34th ACM Conference on Hypertext and Social Media
 HT '22: 33rd ACM Conference on Hypertext and Social Media
 HT '21: 32nd ACM Conference on Hypertext and Social Media
 HT '20: 31st ACM Conference on Hypertext and Social Media
 
 ecai (title)
+ECAI 2024 - 27th European Conference on Artificial Intelligence
 ECAI 2023 - 26th European Conference on Artificial Intelligence
 ECAI 2020 - 24th European Conference on Artificial Intelligence
 
 ijcai (title)
+Proceedings of the Thirty-Third International Joint Conference on Artificial Intelligence
 Proceedings of the Thirty-Second International Joint Conference on Artificial Intelligence
 Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence
 Proceedings of the Thirtieth International Joint Conference on Artificial Intelligence
 Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence
 
 icml (title)
+Forty-first International Conference on Machine Learning
 International Conference on Machine Learning, ICML 2023
 International Conference on Machine Learning, ICML 2022
 Proceedings of the 38th International Conference on Machine Learning, ICML 2021
 Proceedings of the 37th International Conference on Machine Learning, ICML 2020
 
 nips (title)
+Advances in Neural Information Processing Systems 38
 Advances in Neural Information Processing Systems 36: Annual Conference on Neural Information Processing Systems 2023
 Advances in Neural Information Processing Systems 35: Annual Conference on Neural Information Processing Systems 2022
 Advances in Neural Information Processing Systems 34: Annual Conference on Neural Information Processing Systems 2021
-#Advances in Neural Information Processing Systems 33: Annual Conference on Neural Information Processing Systems 2020
+Advances in Neural Information Processing Systems 33: Annual Conference on Neural Information Processing Systems 2020
+
+aaai (doi)
+Thirty-Eighth AAAI Conference on Artificial Intelligence
+Thirty-Seventh AAAI Conference on Artificial Intelligence
+Thirty-Sixth AAAI Conference on Artificial Intelligence
+Thirty-Fifth AAAI Conference on Artificial Intelligence
+The Thirty-Fourth AAAI Conference on Artificial Intelligence
+
+iclr (doi)
+The Twelfth International Conference on Learning Representations
+The Eleventh International Conference on Learning Representations
+The Tenth International Conference on Learning Representations
+9th International Conference on Learning Representations
+8th International Conference on Learning Representations
