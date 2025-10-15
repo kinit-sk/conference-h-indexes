@@ -6,3 +6,4 @@ lxml
 pydub
 requests
 pandas
+beautifulsoup4

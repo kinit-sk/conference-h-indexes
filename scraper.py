@@ -1,5 +1,11 @@
+import os
+import argparse
+import dataclasses
+
+
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
@@ -13,39 +19,170 @@ from lxml.html.soupparser import fromstring
 from time import sleep
 from pydub import AudioSegment
 from random import randrange
-from collections import defaultdict
 from datetime import datetime
 import requests
 import pandas as pd
 
+ROOT_URL = "https://dblp.org/db/conf/"
+STOP_MESSAGE = """Sorry, we can't verify that you're not a robot when JavaScript is turned off.</div><div>Please 
+<a href="//support.google.com/answer/23852?hl=en">enable JavaScript</a> in your browser and reload this page."""
 
-OUTPUT_FILE_PATH = "raw_data.csv"
-
-
-def initiate_scraper():
+def create_driver():
     """
-    Initiates the scraper
+    Creates a Selenium driver
     """
-    scrape_targets = extract_scrape_settings()
-    root_url = "https://dblp.org/db/conf/"
-    driver = create_driver()
-    recognizer = create_recognizer()
-    conference_links = get_conference_links(scrape_targets, root_url)
-    manage_conference_info(conference_links, scrape_targets, driver, recognizer)
-    driver.quit()
+    ua = UserAgent()
+    user_agent = ua.random
+    options = Options()
+    # options.add_argument("--headless")
+    options.add_argument('--accept-lang=en-GB')
+    options.add_argument(f'user-agent={user_agent}')
+    options.add_argument("--disable-blink-features=AutomationControlled")
+
+    # NOTE: if driver cannot be created due to incorrect version, you can edit the version in the uc.Chrome parameter
+    driver = uc.Chrome(version_main=126, options=options)
+    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+    driver.maximize_window()
+    return driver
 
 
-def extract_scrape_settings():
+@dataclasses.dataclass
+class Volume:
+    conference: str
+    mode: str
+    name: str
+    year: str
+    url: str
+    output_folder: str = "out/"
+    search_interval: tuple = (300, 700)
+    checkpoint_interval: int = 50
+
+
+    def __post_init__(self):
+        if not os.path.exists(self.output_folder):
+            os.mkdir(self.output_folder)
+        findings_str = "_f" if "findings" in self.name.lower() else ""
+        self.output_file_name = os.path.join(self.output_folder, f"{self.conference}_{self.year}{findings_str}.csv")
+        self.driver = create_driver()
+        self.recognizer = sr.Recognizer()
+        all_papers = self.get_all_papers()
+        self.unscraped = self.filter_saved_papers(all_papers)[:]
+
+    @property
+    def output_file_exists(self):
+        return os.path.exists(self.output_file_name)
+
+
+    def scrape(self):
+        """
+        Searches for every downloaded paper on Google Scholar and finds its citation count.
+        """
+
+        scraped = []
+        print(f"Getting citation counts for {len(self.unscraped)} papers | Saving progress every {self.checkpoint_interval} steps")
+        for index, paper in enumerate(self.unscraped, 1):
+            doi = paper["DOI"]
+            if doi == -1:
+                scraped.append({**paper, "scholar_title": -1, "citations": -1,"retrieved_at": datetime.now()})
+                continue
+
+            self.driver.get(f"https://scholar.google.com/scholar?q={doi}")
+
+            # Check and solve CAPTCHA
+            while STOP_MESSAGE in self.driver.page_source or "not a robot" in self.driver.page_source:
+                self.driver.refresh()
+                solve_captcha(self.driver, self.recognizer)
+
+            # Scrape citation count
+            scholar_title, citation_count = self._parse_scholar_entry()
+            scraped.append({**paper, "scholar_title": scholar_title, "citations": citation_count,
+                            "retrieved_at": datetime.now()})
+
+            # Save if checkpoint or end
+            if index % self.checkpoint_interval == 0 or index == len(self.unscraped):
+                print(f"Checkpoint: {index} scrapings saved")
+                pd.DataFrame(scraped).to_csv(self.output_file_name, mode='a', header=not self.output_file_exists, index=False)
+                scraped = []
+
+            sleep(randrange(*self.search_interval) / 100)
+
+        print("Citations collected")
+        self.driver.quit()
+
+    def filter_saved_papers(self, all_papers):
+        all_df = pd.DataFrame(all_papers)
+        if self.output_file_exists:
+            saved_df = pd.read_csv(self.output_file_name)
+            if not saved_df.empty:
+                print(f"Found existing data for {self.conference} {self.name}, resuming from last saved paper")
+                mask = all_df["DOI"].isin(saved_df["DOI"])
+                all_df = all_df[~mask]
+        return all_df.to_dict("records")
+
+    def get_all_papers(self):
+        """
+        Initializes the papers from volume page on dblp.
+        """
+
+        raw_data = {"DOI": [], "conference_title": [], "conference": [], "volume": [], "year": []}
+
+        page_data = fromstring(requests.get(self.url).text)
+        print(f"Getting data from the volume {self.name}")
+        paper_containers = page_data.xpath("//ul[@class='publ-list']")
+
+        for container in paper_containers:
+            papers_list = container.xpath("./li[not(@class='no-pub')]")
+            for paper in papers_list:
+                paper_title = get_element_text(paper.xpath(f"./cite/span[@itemprop='name']")[0])
+
+                doi = paper_title
+                if self.mode == "doi":
+                    paper_doi = paper.xpath(".//a[contains(text(), 'DOI')]")
+                    if paper_doi:
+                        doi = paper_doi[0].attrib["href"].strip("https://doi.org/")
+
+                raw_data["DOI"].append(doi)
+                raw_data["conference_title"].append(paper_title)
+                raw_data["conference"].append(self.conference)
+                raw_data["volume"].append(self.name)
+                raw_data["year"].append(self.year)
+
+        return raw_data
+
+
+    def _parse_scholar_entry(self):
+        """
+        Returns the citation count for the current google scholar article
+        """
+
+        try:
+            title = self.driver.find_element(By.XPATH, "//div[@data-rp='0']//h3/a").text
+            try:
+                citation_element = WebDriverWait(self.driver, 10).until(
+                    ec.presence_of_element_located((By.XPATH, "//a[contains(text(), 'Cited by')]"))
+                )
+                citation_count = int(citation_element.text.split()[-1])
+            except TimeoutException:
+                citation_count = 0
+        except NoSuchElementException:
+            title = -1
+            citation_count = -1
+
+        return title, citation_count
+
+
+def parse_scrape_settings(settings_file="scrape_settings.txt"):
     """
     Extracts conferences, volumes and Google Scholar scrape method (through DOI or title)
     from the scrape_settings.txt file
     """
 
-    scrape_targets = defaultdict(list)
-    conference = ""
+    scrape_targets = []
+    conference = {}
     is_conference = True
 
-    with open("scrape_settings.txt") as file:
+    with open(settings_file) as file:
         for line in file:
             line = line.strip()
 
@@ -58,37 +195,15 @@ def extract_scrape_settings():
                 mode = "doi"
                 if len(split) == 2 and "title" in split[1].lower():
                     mode = "title"
-                conference = (split[0], mode)
+                conference = {"conference": split[0], "mode": mode}
 
             elif line == "":
+                conference = {}
                 is_conference = True
             else:
-                scrape_targets[conference].append(line)
+                scrape_targets.append({**conference, "name": line})
 
     return scrape_targets
-
-
-def create_driver():
-    """
-    Creates a Selenium driver
-    """
-    ua = UserAgent()
-    user_agent = ua.random
-    options = Options()
-    # options.add_argument("--headless")
-    options.add_argument(f'user-agent={user_agent}')
-    options.add_argument("--disable-blink-features=AutomationControlled")
-
-    # NOTE: if driver cannot be created due to incorrect version, you can edit the version in the uc.Chrome parameter
-    driver = uc.Chrome(version_main=126, options=options)
-    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
-    driver.maximize_window()
-    return driver
-
-
-def create_recognizer():
-    return sr.Recognizer()
 
 
 def get_elements_urls(elements):
@@ -107,142 +222,13 @@ def format_volume_name(volume):
     return f'"{volume}"' if "'" in volume else f"'{volume}'"
 
 
-def get_conference_links(scrape_data, root_url):
-    """
-    Finds the links of conference volumes specified in scrape settings
-    """
-
-    links = defaultdict(list)
-    for conference, volumes in scrape_data.items():
-        conference_page = fromstring(requests.get(root_url + conference[0]).text)
-        for volume in volumes:
-            volume = format_volume_name(volume)
-            conference_link = conference_page.xpath(f"""//span[contains(text(), {volume})]/ancestor::cite/preceding-sibling::nav[@class='publ']//a""")[0]
-            year = conference_link.xpath("./ancestor::ul/preceding-sibling::header[1]/h2")[0].attrib["id"]
-            links[conference].append([get_element_url(conference_link), year])
-    return links
-
-
-def manage_conference_info(conference_data, scrape_data, driver, recognizer):
-    """
-    Iterates through all conferences and papers and saves their information
-    """
-
-    raw_data = {"DOI": [], "conference_title": [], "scholar_title": [], "conference": [], "volume": [], "citations": [],
-                "year": [], "retrieved_at": []}
-    for conference_info, conference_data in conference_data.items():
-        conference, mode = conference_info
-        conference_scrape_volumes = list(scrape_data[conference_info])
-        for index, (link, year) in enumerate(conference_data):
-            scrape_conference_info(conference_scrape_volumes, index,
-                                  link, year, conference, raw_data, mode, driver, recognizer)
-    return raw_data
-
-
-def scrape_conference_info(conference_scrape_volumes, index, link, year, conference, raw_data, mode, driver, recognizer):
-    """
-    Gets data of conference papers from dblp and Google Scholar
-    and saves it to raw_data.csv
-    """
-
-    dois = []
-    page_data = fromstring(requests.get(link).text)
-    volume = conference_scrape_volumes[index]
-    print(f"Getting data from the volume {volume}")
-    paper_containers = page_data.xpath("//ul[@class='publ-list']")
-
-    for container in paper_containers:
-        papers_list = container.xpath("./li[not(@class='no-pub')]")
-        for paper in papers_list:
-            paper_title = get_element_text(paper.xpath(f"./cite/span[@itemprop='name']")[0])
-
-            if mode == "doi":
-                paper_doi = paper.xpath(".//a[contains(text(), 'DOI')]")
-                if paper_doi:
-                    dois.append(get_element_url(paper_doi[0]).strip("https://doi.org/"))
-                else:
-                    print(f"No DOI for {paper_title}, using the title instead")
-                    dois.append(paper_title)
-            else:
-                dois.append(f'"{paper_title}"')
-
-            raw_data["conference_title"].append(paper_title)
-            raw_data["conference"].append(conference)
-            raw_data["volume"].append(volume)
-            raw_data["year"].append(year)
-
-    citations, retrieved_at, scholar_titles = get_citations(dois, driver, recognizer)
-    raw_data["DOI"] += dois
-    raw_data["citations"] += citations
-    raw_data["retrieved_at"] += retrieved_at
-    raw_data["scholar_title"] += scholar_titles
-    save_results(raw_data)
-
-
-def get_citations(dois, driver, recognizer):
-    """
-    Searches for every downloaded paper on Google Scholar and finds its citation count
-    """
-    print(f"Getting citations from {len(dois)} papers")
-    citation_counts = []
-    retrieved_at = []
-    titles = []
-    for index, doi in enumerate(dois):
-        if (index + 1) % 50 == 0:
-            print(f"{index} papers scraped")
-        if doi == -1:
-            retrieved_at.append(datetime.now())
-            citation_counts.append(-1)
-            titles.append(-1)
-            continue
-
-        driver.get(f"https://scholar.google.com/scholar?q={doi}")
-        while """Sorry, we can't verify that you're not a robot when JavaScript is turned off.</div><div>Please <a href="//support.google.com/answer/23852?hl=en">enable JavaScript</a> in your browser and reload this page.""" in driver.page_source:
-            driver.refresh()
-            solve_captcha(driver, recognizer)
-
-        get_result_information(titles, citation_counts, retrieved_at, driver)
-        sleep(randrange(300, 700) / 100)
-
-    print("Citations collected")
-    return citation_counts, retrieved_at, titles
-
-
-def get_result_information(titles, citation_counts, retrieved_at, driver):
-    """
-    Returns the citation count for the current google scholar article
-    """
-    try:
-        title = driver.find_element(By.XPATH, "//div[@data-rp='0']//h3/a").text
-        titles.append(title)
-        try:
-            citation_element = WebDriverWait(driver, 10).until(
-                ec.presence_of_element_located((By.XPATH, "//a[contains(text(), 'Cited by')]"))
-            )
-            citation_counts.append(int(citation_element.text.split()[-1]))
-        except TimeoutException:
-            citation_counts.append(0)
-            print("No citations")
-    except NoSuchElementException:
-        titles.append(-1)
-        citation_counts.append(-1)
-        print("Paper is not on google scholar")
-
-    retrieved_at.append(datetime.now())
-
-
-def save_results(data):
-    print("Saving results")
-    pd.DataFrame(data).to_csv(OUTPUT_FILE_PATH, index=False)
-
-
 def solve_captcha(driver, recognizer):
     """
     Attempts to solve a detected captcha by clicking captcha checkbox
     or by solving the captcha audio. Will fail if the audio solve is no longer available
     and will require a cooldown period until captcha is solvable again.
     """
-    
+
     print("Solving captcha..")
     frame = WebDriverWait(driver, 20).until(ec.presence_of_element_located(
         (By.CSS_SELECTOR, "iframe")))
@@ -292,4 +278,45 @@ def solve_audio_captcha(driver, recognizer, link):
     text_field.send_keys(Keys.ENTER)
 
 
-initiate_scraper()
+def search_volume_info(scrape_data):
+    """
+    Finds the links of conference volumes specified in scrape settings
+    """
+
+    for volume in scrape_data:
+        conference_page = fromstring(requests.get(ROOT_URL + volume["conference"]).text)
+
+        volume_name = volume["name"]
+        formatted_name =  f'"{volume_name}"' if "'" in volume_name else f"'{volume_name}'"
+
+        conference_link = conference_page.xpath(
+            f"""//span[contains(text(), {formatted_name})]/ancestor::cite/preceding-sibling::nav[@class='publ']//a""")[0]
+        year = conference_link.xpath("./ancestor::ul/preceding-sibling::header[1]/h2")[0].attrib["id"]
+
+        volume["year"] = year
+        volume["url"] = conference_link.attrib["href"]
+
+    return scrape_data
+
+
+def main():
+    """
+    Loads the scrape settings and scrapes each specified conference volume
+    """
+
+    parser = argparse.ArgumentParser(description="Scrape conference volumes based on settings file")
+    parser.add_argument("--settings", default="scrape_settings.txt",
+                        help="Path to the scrape settings file (default: scrape_settings.txt)")
+    parser.add_argument("--out", default="out/",
+                        help="Path to the output folder (default: out/)")
+    args = parser.parse_args()
+    SCRAPE_SETTINGS_PATH = args.settings
+    OUTPUT_FOLDER = args.out
+
+    to_scrape_volumes = parse_scrape_settings(SCRAPE_SETTINGS_PATH)
+    to_scrape_volumes = search_volume_info(to_scrape_volumes)
+    for volume in to_scrape_volumes:
+         Volume(**volume, output_folder=OUTPUT_FOLDER).scrape()
+
+if __name__ == "__main__":
+    main()
