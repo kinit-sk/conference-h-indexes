@@ -1,9 +1,6 @@
 import glob
+import argparse
 import pandas as pd
-
-
-SCRAPING_FOLDER = "out/"
-OUTPUT_FILE_PATH = "conferences_h_indices.csv"
 
 
 def calculate_h_index(citations):
@@ -31,6 +28,17 @@ def open_all(folder, columns):
     agg_df = pd.concat(df_list, ignore_index=True)
     return agg_df
 
+
+
+parser = argparse.ArgumentParser(description="Compute H-index for conference volumes based on citation data.")
+parser.add_argument("--csv-folder", default="out/",
+                    help="Path to the folder containing the CSV files (default: out/)")
+parser.add_argument("--out", default="conferences_h_indices.csv",
+                    help="Name of the output CSV file (default: conferences_h_indices.csv)")
+
+args = parser.parse_args()
+SCRAPING_FOLDER = args.csv_folder
+OUTPUT_FILE_PATH = args.out
 
 df = open_all(SCRAPING_FOLDER, ["DOI", "conference", "volume", "citations", "year"])
 filtered_df = df[df["DOI"] != -1][["conference", "volume", "citations", "year"]]

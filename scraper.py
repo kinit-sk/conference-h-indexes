@@ -1,5 +1,5 @@
 import os
-import pathlib
+import argparse
 import dataclasses
 
 
@@ -23,7 +23,6 @@ from datetime import datetime
 import requests
 import pandas as pd
 
-SCRAPE_SETTINGS_PATH = "scrape_settings.txt"
 ROOT_URL = "https://dblp.org/db/conf/"
 STOP_MESSAGE = """Sorry, we can't verify that you're not a robot when JavaScript is turned off.</div><div>Please 
 <a href="//support.google.com/answer/23852?hl=en">enable JavaScript</a> in your browser and reload this page."""
@@ -304,10 +303,20 @@ def main():
     """
     Loads the scrape settings and scrapes each specified conference volume
     """
+
+    parser = argparse.ArgumentParser(description="Scrape conference volumes based on settings file")
+    parser.add_argument("--settings", default="scrape_settings.txt",
+                        help="Path to the scrape settings file (default: scrape_settings.txt)")
+    parser.add_argument("--out", default="out/",
+                        help="Path to the output folder (default: out/)")
+    args = parser.parse_args()
+    SCRAPE_SETTINGS_PATH = args.settings
+    OUTPUT_FOLDER = args.out
+
     to_scrape_volumes = parse_scrape_settings(SCRAPE_SETTINGS_PATH)
     to_scrape_volumes = search_volume_info(to_scrape_volumes)
     for volume in to_scrape_volumes:
-         Volume(**volume).scrape()
+         Volume(**volume, output_folder=OUTPUT_FOLDER).scrape()
 
 if __name__ == "__main__":
     main()
