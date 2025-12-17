@@ -7,8 +7,11 @@ csv_files = glob.glob(f"{SCRAPING_FOLDER}/*.csv")
 for file in csv_files:
     df = pd.read_csv(file, usecols=columns)
     unprocessed = df[df["citations"] == -1]
-    if len(unprocessed) < 2:
+
+    if not len(unprocessed):
         continue
+
+    print(f"Found {len(unprocessed)} papers without citations for: {file}")
 
     for index, paper in unprocessed.iterrows():
         citations = input(f" {paper['conference_title']}\n Fill in the number of citations for the above paper title: ")
