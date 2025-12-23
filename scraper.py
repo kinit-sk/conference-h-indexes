@@ -90,7 +90,7 @@ class Volume:
                 continue
             scholar_title, citation_count = -1, -1
 
-            doi = paper["DOI"]
+            doi = paper["DOI"] if self.mode == "doi" else paper["conference_title"]
             if doi != -1:
                 self.driver.get(f"https://scholar.google.com/scholar?q={doi}")
 
@@ -109,10 +109,12 @@ class Volume:
             sleep(randrange(*self.search_interval) / 100)
 
             # Save if checkpoint or end
-            if count % self.checkpoint_interval == 0 or count == unscraped_count:
+            if count % self.checkpoint_interval == 0:
                 print(f"Checkpoint: {count} scrapings saved")
                 self.all_papers.to_csv(self.output_file_name, mode='w', header=True, index=False)
 
+        # Save remaining papers
+        self.all_papers.to_csv(self.output_file_name, mode='w', header=True, index=False)
         print("Citations collected")
 
     def get_all_papers(self):

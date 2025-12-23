@@ -8,7 +8,7 @@ for file in csv_files:
     df = pd.read_csv(file, usecols=columns)
     unprocessed = df[df["citations"] == -1]
 
-    if not len(unprocessed):
+    if len(unprocessed) < 1:
         continue
 
     print(f"Found {len(unprocessed)} papers without citations for: {file}")
