@@ -2,10 +2,9 @@ import glob
 import pandas as pd
 
 SCRAPING_FOLDER = "out/"
-columns = ["DOI", "conference_title", "conference", "citations", "year"]
 csv_files = glob.glob(f"{SCRAPING_FOLDER}/*.csv")
 for file in csv_files:
-    df = pd.read_csv(file, usecols=columns)
+    df = pd.read_csv(file)
     unprocessed = df[df["citations"] == -1]
 
     if len(unprocessed) < 1:
@@ -18,4 +17,4 @@ for file in csv_files:
         if citations.isdigit():
             df.loc[index, "citations"] = int(citations)
 
-    df.to_csv(file)
+    df.to_csv(file, index=False)
