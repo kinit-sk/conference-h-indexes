@@ -5,12 +5,12 @@ A set of scripts for scraping citation data to enable h-index comparisons among 
 In this repository, there are three scripts present for scraping and processing of conference information from dblp.
 
 ### 1. Scraper ([scraper.py](scraper.py))  
-It works by finding all articles in requested volumes based on [scraper seettings](#scraper-settings) on dblp and then 
-finds their respective citation counts on google scholar either through the article's DOI or title.  
-By default, the raw scraped data get saved into an ```out/``` folder where for each volume of the conference a 
+It works by finding all articles in requested volumes based on [scraper seettings](#scraper-settings) from dblp.org
+and then finds their respective citation counts on google scholar either through the article's DOI or title.  
+By default, the raw scraped data gets saved into an ```out/``` folder where for each volume of each conference a 
 separate csv file is created.  
 Here csv naming is created by concatenating the conference shortcut (e. g. "acl"), and the year (e. g. "2023"). Additionally,
-if the processed volume is a finding, the name will be prepended with "_f".
+if the processed volume is a finding, the name will be appended with "_f".
 
 **Example names**:
 - **acl_2023.csv**: Main conference of ACL 2023
@@ -18,13 +18,13 @@ if the processed volume is a finding, the name will be prepended with "_f".
 
 ### 2. H-index calculator  ([h_index_calculator.py](h_index_calculation.py))    
 It aggregates all csv files in the ```out/``` folder and calculates the h-index for each conference volume. The output
-is then saved a separate csv with the name ```conferences_h_indices.csv```
+is then saved in a csv file with name ```conferences_h_indices.csv```
 
 ### 3. Manual revision ([manual_revision.py](manual_revision.py))
 This script scans all csv files and searches for papers that have a citation count of -1, which indicates that the 
 scraper was not able to find the paper on google scholar.  
 Then script asks for revision for each of the identified papers, where use can either input a valid citation count or
-just press Enter to the revision. Afterwards, the revision are updated in their corresponding csv files.
+just press Enter to skip the revision. Afterwards, the revisions are updated in their corresponding csv files.
 
 ### Scraper settings
 In order to scrape a conference volume, the scraper needs at least 2 pieces of information:
