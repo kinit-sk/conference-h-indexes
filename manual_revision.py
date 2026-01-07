@@ -5,7 +5,8 @@ SCRAPING_FOLDER = "out/"
 csv_files = glob.glob(f"{SCRAPING_FOLDER}/*.csv")
 for file in csv_files:
     df = pd.read_csv(file)
-    unprocessed = df[df["citations"] == -1]
+    unprocessed = df[(df["citations"] == -1) | (df["citations"].isnull())]
+
 
     if len(unprocessed) < 1:
         continue
